@@ -36,43 +36,45 @@ def selecionar_arquivo():
 
 
 def atualizar_cotacoes():
-#Ler dataframe de moedas
-    df = pd.read_excel(var_caminhoarquivo.get())
-    moedas = df.iloc[:,0]
-#pegar data de inicio e fim das cotacoes
-    data_inicial = calendario_datainicial.get()
-    data_final = calendario_datafinal.get()
+    try:
+    #Ler dataframe de moedas
+        df = pd.read_excel(var_caminhoarquivo.get())
+        moedas = df.iloc[:,0]
+    #pegar data de inicio e fim das cotacoes
+        data_inicial = calendario_datainicial.get()
+        data_final = calendario_datafinal.get()
 
-    ano_inicial = data_inicial[-4:]
-    mes_inicial = data_inicial[3:5]
-    dia_inicial = data_inicial[:2]
+        ano_inicial = data_inicial[-4:]
+        mes_inicial = data_inicial[3:5]
+        dia_inicial = data_inicial[:2]
 
-    ano_final = data_final[-4:]
-    mes_final = data_final[3:5]
-    dia_final = data_final[:2]
-#para cada moeda, pegar todas as cotacoes daquela moeda
-    for moeda in moedas:
-        link = f"https://economia.awesomeapi.com.br/json/daily/{moeda}-BRL/?" \
-           f"start_date={ano_inicial}{mes_inicial}{dia_inicial}&" \
-           f"end_date={ano_final}{mes_final}{dia_final}"
+        ano_final = data_final[-4:]
+        mes_final = data_final[3:5]
+        dia_final = data_final[:2]
+    #para cada moeda, pegar todas as cotacoes daquela moeda
+        for moeda in moedas:
+            link = f"https://economia.awesomeapi.com.br/json/daily/{moeda}-BRL/?" \
+               f"start_date={ano_inicial}{mes_inicial}{dia_inicial}&" \
+               f"end_date={ano_final}{mes_final}{dia_final}"
 
-        requisicao_moeda = requests.get(link)
-        cotacoes = requisicao_moeda.json()
-        for cotacao in cotacoes:
-            timestamp = int(cotacao['timestamp'])
-            bid = float(cotacao['bid'])
-            data = datetime.fromtimestamp(timestamp)
-            data = data.strftime("%d/%m/%Y")
-            if data not in df:
-                df[data] = np.nan
+            requisicao_moeda = requests.get(link)
+            cotacoes = requisicao_moeda.json()
+            for cotacao in cotacoes:
+                timestamp = int(cotacao['timestamp'])
+                bid = float(cotacao['bid'])
+                data = datetime.fromtimestamp(timestamp)
+                data = data.strftime("%d/%m/%Y")
+                if data not in df:
+                    df[data] = np.nan
 
-            df.loc[df.iloc[:, 0] == moeda, data] = bid
+                df.loc[df.iloc[:, 0] == moeda, data] = bid
 
-    df.to_excel("teste.xlsx")
-    label_atualisarcotacoes ['text'] = "Arquivo Atualizado com Sucesso"
-    label_atualisarcotacoes['fg'] = "green"
-    #criar uma coluna em um novo dataframe com todas as cotacoes daquela moeda
-
+        df.to_excel("teste.xlsx")
+        label_atualisarcotacoes ['text'] = "Arquivo Atualizado com Sucesso"
+        label_atualisarcotacoes['fg'] = "green"
+        #criar uma coluna em um novo dataframe com todas as cotacoes daquela moeda
+    except:
+        label_atualisarcotacoes['text'] = "Selecione um arquivo excell no formato correto"
 
 janela = tk.Tk()
 
